@@ -17,6 +17,8 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-check-${{ matrix.toolchain }}-${{ hashFiles('**/Cargo.toml') }}
+      - name: Install alsa and udev
+        run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -65,6 +67,8 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-test-${{ matrix.toolchain }}-${{ hashFiles('**/Cargo.toml') }}
+      - name: Install alsa and udev
+        run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -104,6 +108,8 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-clippy-${{ matrix.toolchain }}-${{ hashFiles('**/Cargo.toml') }}
+      - name: Install alsa and udev
+        run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
