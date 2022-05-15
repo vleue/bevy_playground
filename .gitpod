@@ -36,3 +36,8 @@ tasks:
 vscode:
   extensions:
     - matklad.rust-analyzer
+
+ports:
+  - port: 8000
+    onOpen: open-browser
+    visibility: public
