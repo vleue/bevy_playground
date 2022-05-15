@@ -15,8 +15,9 @@ tasks:
   - name: Start web server
     command: python3 -m http.server --directory wasm
 
-  - name: Setup rust-analyzer for wasm target
+  - name: Setup rust-analyzer
     before: |
+      sudo apt-get update
       sudo apt-get install --no-install-recommends -yq libasound2-dev libudev-dev
     init: |
       mkdir .vscode
