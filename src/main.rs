@@ -56,25 +56,25 @@ fn bouncing(
     for (mut moving, mut transform) in moving.iter_mut() {
         transform.translation += (moving.speed * time.delta_seconds() * 200.0).extend(0.0);
         let window = windows.primary();
-        if transform.translation.x + moving.size.x / 2.0 > window.width() / 2.0 {
-            if moving.speed.x > 0.0 {
-                moving.speed.x *= -1.0;
-            }
+        if transform.translation.x + moving.size.x / 2.0 > window.width() / 2.0
+            && moving.speed.x > 0.0
+        {
+            moving.speed.x *= -1.0;
         }
-        if transform.translation.x - moving.size.x / 2.0 < -window.width() / 2.0 {
-            if moving.speed.x < 0.0 {
-                moving.speed.x *= -1.0;
-            }
+        if transform.translation.x - moving.size.x / 2.0 < -window.width() / 2.0
+            && moving.speed.x < 0.0
+        {
+            moving.speed.x *= -1.0;
         }
-        if transform.translation.y + moving.size.y / 2.0 > window.height() / 2.0 {
-            if moving.speed.y > 0.0 {
-                moving.speed.y *= -1.0;
-            }
+        if transform.translation.y + moving.size.y / 2.0 > window.height() / 2.0
+            && moving.speed.y > 0.0
+        {
+            moving.speed.y *= -1.0;
         }
-        if transform.translation.y - moving.size.y / 2.0 < -window.height() / 2.0 {
-            if moving.speed.y < 0.0 {
-                moving.speed.y *= -1.0;
-            }
+        if transform.translation.y - moving.size.y / 2.0 < -window.height() / 2.0
+            && moving.speed.y < 0.0
+        {
+            moving.speed.y *= -1.0;
         }
     }
 }
