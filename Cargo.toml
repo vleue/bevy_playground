@@ -8,3 +8,7 @@ publish = false
 [dependencies]
 bevy = "0.7"
 rand = "0.8"
+
+[profile.dev.package."*"]
+opt-level = 3
+
