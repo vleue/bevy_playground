@@ -9,9 +9,6 @@ github:
     addBadge: true
 
 tasks:
-  - name: Watch for changes
-    command: cargo watch --shell "cargo build --release --target wasm32-unknown-unknown && wasm-bindgen --out-dir wasm --target web target/wasm32-unknown-unknown/release/bevy_playground.wasm --no-typescript --remove-name-section --remove-producers-section" --ignore wasm
-
   - name: Start web server
     command: python3 -m http.server --directory wasm
 
@@ -23,15 +20,20 @@ tasks:
       mkdir .vscode
       echo "{\"rust-analyzer.cargo.target\":\"wasm32-unknown-unknown\"}" > .vscode/settings.json
 
-  - name: Install wasm tooling
+  - name: Install wasm tooling and prebuild
     before: |
       rustup target add wasm32-unknown-unknown
       cargo install cargo-quickinstall
       cargo quickinstall wasm-bindgen-cli
       cargo quickinstall cargo-watch
     init: |
+      cargo build
+      cargo build --target wasm32-unknown-unknown
       cargo build --release --target wasm32-unknown-unknown
-      wasm-bindgen --out-dir wasm --target web --no-typescript --remove-name-section --remove-producers-section target/wasm32-unknown-unknown/release/bevy_playground.wasm
+      wasm-bindgen --out-dir wasm --target web --no-typescript --remove-name-section --remove-producers-section target/wasm32-unknown-unknown/debug/bevy_playground.wasm
+
+  - name: Watch for changes
+    command: cargo watch --shell "cargo build --target wasm32-unknown-unknown && wasm-bindgen --out-dir wasm --target web target/wasm32-unknown-unknown/debug/bevy_playground.wasm --no-typescript --remove-name-section --remove-producers-section" --ignore wasm
 
 vscode:
   extensions:
