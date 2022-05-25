@@ -1,82 +1,154 @@
-use bevy::{math::const_vec2, prelude::*};
-use rand::Rng;
+use bevy::prelude::*;
 
 fn main() {
-    App::new()
-        .insert_resource(WindowDescriptor {
-            title: "Bevy Playground".to_string(),
-            #[cfg(target_arch = "wasm32")]
-            canvas: Some("#playground".to_string()),
+    let mut app = App::new();
+
+    app.insert_resource(WindowDescriptor {
+        title: "Bevy Playground".to_string(),
+        canvas: Some("#playground".to_string()),
+        fit_canvas_to_parent: true,
+        ..default()
+    })
+    .add_plugins(DefaultPlugins);
+
+    app.add_startup_system(setup).add_system(reactive).run();
+}
+
+#[derive(Debug, Component)]
+struct Menu;
+
+fn reactive(
+    windows: Res<Windows>,
+    mut root: Query<&mut Style, (Without<Parent>, Without<Menu>)>,
+    mut menu: Query<&mut Style, With<Menu>>,
+) {
+    let window = windows.get_primary().unwrap();
+    let ratio = window.width() / window.height();
+    let mut root = root.single_mut();
+    let mut menu = menu.single_mut();
+    if ratio > 1.0 {
+        root.flex_direction = FlexDirection::Row;
+        menu.size = Size::new(Val::Percent(50.0), Val::Percent(100.0));
+    } else {
+        root.flex_direction = FlexDirection::Column;
+        menu.size = Size::new(Val::Percent(100.0), Val::Percent(50.0));
+    }
+}
+
+fn setup(mut commands: Commands) {
+    commands.spawn_bundle(UiCameraBundle::default());
+    commands
+        .spawn_bundle(NodeBundle {
+            style: Style {
+                size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
+                justify_content: JustifyContent::SpaceBetween,
+                ..default()
+            },
+            color: Color::NONE.into(),
             ..default()
         })
-        .add_plugins(DefaultPlugins)
-        .add_startup_system(setup)
-        .add_system(bouncing)
-        .run();
+        .with_children(|parent| {
+            parent
+                .spawn_bundle(NodeBundle {
+                    style: Style {
+                        size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
+                        ..default()
+                    },
+                    ..default()
+                })
+                .with_children(|parent| {
+                    parent
+                        .spawn_bundle(NodeBundle {
+                            style: Style {
+                                flex_basis: Val::Auto,
+                                aspect_ratio: Some(0.8),
+                                size: Size::new(Val::Percent(80.0), Val::Percent(80.0)),
+                                margin: UiRect::all(Val::Auto),
+                                border: UiRect::all(Val::Px(20.0)),
+                                ..default()
+                            },
+                            color: Color::rgb(0.4, 0.4, 1.0).into(),
+                            ..default()
+                        })
+                        .with_children(|parent| {
+                            let size = 22.0;
+                            parent
+                                .spawn_bundle(NodeBundle {
+                                    style: Style {
+                                        size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
+                                        flex_direction: FlexDirection::ColumnReverse,
+                                        justify_content: JustifyContent::SpaceBetween,
+                                        ..default()
+                                    },
+                                    color: Color::rgb(0.8, 0.8, 1.0).into(),
+                                    ..default()
+                                })
+                                .with_children(|parent| {
+                                    add_line(parent, size);
+                                    add_line(parent, size);
+                                    add_line(parent, size);
+                                    add_line(parent, size);
+                                });
+                        });
+                });
+            parent
+                .spawn_bundle(NodeBundle {
+                    style: Style {
+                        flex_direction: FlexDirection::ColumnReverse,
+                        justify_content: JustifyContent::Center,
+                        size: Size::new(Val::Percent(50.0), Val::Percent(100.0)),
+                        ..default()
+                    },
+                    color: Color::rgb(0.15, 0.15, 0.15).into(),
+                    ..default()
+                })
+                .insert(Menu);
+        });
 }
 
-#[derive(Component)]
-struct Moving {
-    size: Vec2,
-    speed: Vec2,
-}
-
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
-    let mut rng = rand::thread_rng();
-    for _ in 0..rng.gen_range(3..6) {
-        commands
-            .spawn_bundle(SpriteBundle {
-                texture: asset_server.load("vleue.png"),
+fn add_line(parent: &mut ChildBuilder, size: f32) {
+    parent
+        .spawn_bundle(NodeBundle {
+            style: Style {
+                size: Size::new(Val::Percent(100.0), Val::Percent(size)),
+                justify_content: JustifyContent::SpaceBetween,
                 ..default()
-            })
-            .insert(Moving {
-                size: const_vec2!([188.0, 162.0]),
-                speed: Vec2::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0)).normalize()
-                    * rng.gen_range(0.5..2.0),
-            });
-    }
-    for _ in 0..rng.gen_range(3..6) {
-        commands
-            .spawn_bundle(SpriteBundle {
-                texture: asset_server.load("birdoggo.png"),
+            },
+            color: Color::NONE.into(),
+            ..default()
+        })
+        .with_children(|parent| {
+            parent.spawn_bundle(NodeBundle {
+                style: Style {
+                    size: Size::new(Val::Percent(size), Val::Percent(100.0)),
+                    ..default()
+                },
+                color: Color::rgb(0.2, 0.2, 1.0).into(),
                 ..default()
-            })
-            .insert(Moving {
-                size: const_vec2!([200.0; 2]),
-                speed: Vec2::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0)).normalize()
-                    * rng.gen_range(0.5..2.0),
             });
-    }
-}
-
-fn bouncing(
-    mut moving: Query<(&mut Moving, &mut Transform)>,
-    time: Res<Time>,
-    windows: Res<Windows>,
-) {
-    for (mut moving, mut transform) in moving.iter_mut() {
-        transform.translation += (moving.speed * time.delta_seconds() * 200.0).extend(0.0);
-        let window = windows.primary();
-        if transform.translation.x + moving.size.x / 2.0 > window.width() / 2.0
-            && moving.speed.x > 0.0
-        {
-            moving.speed.x *= -1.0;
-        }
-        if transform.translation.x - moving.size.x / 2.0 < -window.width() / 2.0
-            && moving.speed.x < 0.0
-        {
-            moving.speed.x *= -1.0;
-        }
-        if transform.translation.y + moving.size.y / 2.0 > window.height() / 2.0
-            && moving.speed.y > 0.0
-        {
-            moving.speed.y *= -1.0;
-        }
-        if transform.translation.y - moving.size.y / 2.0 < -window.height() / 2.0
-            && moving.speed.y < 0.0
-        {
-            moving.speed.y *= -1.0;
-        }
-    }
+            parent.spawn_bundle(NodeBundle {
+                style: Style {
+                    size: Size::new(Val::Percent(size), Val::Percent(100.0)),
+                    ..default()
+                },
+                color: Color::rgb(0.2, 0.2, 1.0).into(),
+                ..default()
+            });
+            parent.spawn_bundle(NodeBundle {
+                style: Style {
+                    size: Size::new(Val::Percent(size), Val::Percent(100.0)),
+                    ..default()
+                },
+                color: Color::rgb(0.2, 0.2, 1.0).into(),
+                ..default()
+            });
+            parent.spawn_bundle(NodeBundle {
+                style: Style {
+                    size: Size::new(Val::Percent(size), Val::Percent(100.0)),
+                    ..default()
+                },
+                color: Color::rgb(0.2, 0.2, 1.0).into(),
+                ..default()
+            });
+        });
 }
