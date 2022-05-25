@@ -1,3 +1,4 @@
 /target
 /wasm/bevy_playground_bg.wasm
 /wasm/bevy_playground.js
+.vscode/settings.json
