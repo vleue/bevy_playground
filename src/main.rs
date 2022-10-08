@@ -1,4 +1,4 @@
-use bevy::{math::const_vec2, prelude::*};
+use bevy::prelude::*;
 use rand::Rng;
 
 fn main() {
@@ -22,7 +22,7 @@ struct Moving {
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+    commands.spawn_bundle(Camera2dBundle::default());
     let mut rng = rand::thread_rng();
     for _ in 0..rng.gen_range(3..6) {
         commands
@@ -31,7 +31,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 ..default()
             })
             .insert(Moving {
-                size: const_vec2!([188.0, 162.0]),
+                size: Vec2::new(188.0, 162.0),
                 speed: Vec2::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0)).normalize()
                     * rng.gen_range(0.5..2.0),
             });
@@ -43,7 +43,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 ..default()
             })
             .insert(Moving {
-                size: const_vec2!([200.0; 2]),
+                size: Vec2::new(200.0, 200.0),
                 speed: Vec2::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0)).normalize()
                     * rng.gen_range(0.5..2.0),
             });
